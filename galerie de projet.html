@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galerie de Projets - École</title>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/STLLoader.js"></script>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --light-bg: #f8f9fa;
+      --dark-text: #2c3e50;
+      --light-text: #ecf0f1;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif; 
+      background-color: var(--light-bg);
+      color: var(--dark-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    header { 
+      background-color: var(--primary-color);
+      color: var(--light-text);
+      padding: 1rem 0;
+      box-shadow: var(--box-shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .logo-image {
+      height: 40px;
+      width: auto;
+      max-width: 200px;
+      object-fit: contain;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+      justify-content: center;
+    }
+    
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 0.5rem;
+      min-width: 200px;
+      z-index: 1000;
+    }
+    
+    .dropdown-item {
+      padding: 0.7rem 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: var(--transition);
+      color: var(--dark-text);
+      text-decoration: none;
+      display: block;
+    }
+    
+    .dropdown-item:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .btn { 
+      background-color: var(--secondary-color);
+      color: white; 
+      border: none; 
+      padding: 0.7rem 1.5rem; 
+      border-radius: var(--border-radius); 
+      cursor: pointer; 
+      font-size: 1rem;
+      font-weight: 600;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn:hover { 
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-secondary {
+      background-color: var(--primary-color);
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+    }
+    
+    .btn-danger {
+      background-color: var(--accent-color);
+    }
+    
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 2px solid var(--secondary-color);
+      color: var(--secondary-color);
+    }
+    
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 2rem 1rem; 
+    }
+    
+    .card { 
+      background: white; 
+      border-radius: var(--border-radius); 
+      padding: 1.5rem; 
+      box-shadow: var(--box-shadow); 
+      margin-bottom: 1.5rem;
+      transition: var(--transition);
+      border-left: 4px solid var(--secondary-color);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+      gap: 1.5rem; 
+    }
+    
+    input, textarea, select { 
+      width: 100%; 
+      padding: 0.8rem; 
+      margin-bottom: 1rem; 
+      border: 1px solid #ddd; 
+      border-radius: var(--border-radius); 
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    
+    .project-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+    }
+    
+    .project-3d {
+      width: 100%;
+      height: 200px;
+      background: #f8f9fa;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #ddd;
+      cursor: pointer;
+    }
+    
+    .project-pdf {
+      background: var(--light-bg);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      margin-bottom: 1rem;
+      border: 1px dashed #ddd;
+    }
+    
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      align-items: center;
+      background: white;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+    
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+    }
+    
+    .tag {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    .status-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
+    
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-approved {
+      background: #d1edff;
+      color: #0c5460;
+    }
+    
+    .status-rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      max-width: 90%;
+      max-height: 90%;
+      overflow: auto;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-image {
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: var(--border-radius);
+    }
+    
+    .three-container {
+      width: 100%;
+      height: 400px;
+      background: #f8f9fa;
+      border-radius: var(--border-radius);
+      margin: 1rem 0;
+    }
+    
+    .close-button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .hero-section {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      border-radius: var(--border-radius);
+      margin-bottom: 3rem;
+    }
+    
+    .hero-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    
+    .feature-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      text-align: center;
+      transition: var(--transition);
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .admin-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .admin-action-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      font-size: 1.2rem;
+    }
+    
+    .file-info {
+      background: var(--light-bg);
+      padding: 0.8rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .file-type-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-left: 0.5rem;
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .logo-upload-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-bottom: 2rem;
+    }
+    
+    .logo-preview {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    
+    .logo-preview img {
+      max-height: 100px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: var(--border-radius);
+      color: white;
+      z-index: 1002;
+      box-shadow: var(--box-shadow);
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success {
+      background: var(--success-color);
+    }
+    
+    .toast.error {
+      background: var(--accent-color);
+    }
+    
+    .toast.warning {
+      background: var(--warning-color);
+    }
+    
+    .admin-setup-card {
+      background: #fff3cd;
+      border: 2px dashed #f39c12;
+      text-align: center;
+      padding: 2rem;
+      margin: 2rem auto;
+      max-width: 500px;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .hero-section h2 {
+        font-size: 2rem;
+      }
+      
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-input {
+        min-width: auto;
+      }
+    }
+
+
+    .credits-footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-top: 3rem;
+  background: var(--primary-color);
+  color: white;
+  border-radius: var(--border-radius);
+}
+
+   .credits-text {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+   .credits-names {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--secondary-color);
+}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // 🔧 CONFIGURATION SUPABASE
+    const supabaseUrl = "https://ruttkxnpgjehhmnegrjw.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1dHRreG5wZ2plaGhtbmVncmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxOTIyMTMsImV4cCI6MjA3Nzc2ODIxM30.kOc6IwlFp30ndedNnZE3KFJtp6_QtqRXLfioFVGwcUE";
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // 🔧 COMPTE ADMINISTRATEUR UNIQUE
+    const ADMIN_USER = "admin@gmail.com";
+    const ADMIN_PASSWORD = "admin12345";
+
+    // 🔧 Gestionnaire de notifications
+    function Toast({ message, type, onClose }) {
+      React.useEffect(() => {
+        const timer = setTimeout(() => {
+          onClose();
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+      }, [onClose]);
+      
+      return (
+        <div className={`toast ${type}`}>
+          {message}
+        </div>
+      );
+    }
+
+    function App() {
+      const [user, setUser] = React.useState(null);
+      const [projects, setProjects] = React.useState([]);
+      const [page, setPage] = React.useState("home");
+      const [loading, setLoading] = React.useState(true);
+      const [showDropdown, setShowDropdown] = React.useState(false);
+      const [filter, setFilter] = React.useState("all");
+      const [searchTerm, setSearchTerm] = React.useState("");
+      const [isAdmin, setIsAdmin] = React.useState(false);
+      const [toast, setToast] = React.useState(null);
+      const [logoUrl, setLogoUrl] = React.useState(null);
+
+      const showToast = (message, type = "success") => {
+        setToast({ message, type });
+      };
+
+      // Vérifie la session au chargement
+      React.useEffect(() => {
+        checkSession();
+        loadLogo();
+        
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          const user = session?.user || null;
+          setUser(user);
+          setIsAdmin(user ? user.email === ADMIN_USER : false);
+        });
+
+        return () => subscription.unsubscribe();
+      }, []);
+
+      async function checkSession() {
+        try {
+          const { data } = await supabase.auth.getSession();
+          const user = data.session?.user || null;
+          setUser(user);
+          setIsAdmin(user ? user.email === ADMIN_USER : false);
+          loadProjects();
+        } catch (error) {
+          console.error("Erreur lors de la vérification de session:", error);
+          showToast("Erreur de connexion", "error");
+        }
+      }
+
+      // Charger les projets avec filtres
+      async function loadProjects() {
+        setLoading(true);
+        try {
+          let query = supabase.from("projects").select("*");
+          
+          // Filtre par type
+          if (filter !== "all") {
+            query = query.eq("file_type", filter);
+          }
+          
+          // Recherche
+          if (searchTerm) {
+            query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,tags.ilike.%${searchTerm}%`);
+          }
+          
+          const { data, error } = await query.order("created_at", { ascending: false });
+          if (error) {
+            console.error("Erreur chargement projets:", error);
+            setProjects([]);
+            showToast("Erreur lors du chargement des projets", "error");
+          } else {
+            setProjects(data || []);
+          }
+        } catch (error) {
+          console.error("Erreur inattendue:", error);
+          showToast("Erreur inattendue", "error");
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      // Charger le logo
+      async function loadLogo() {
+        try {
+          const { data } = supabase.storage.from("projects").getPublicUrl("logo/logo.png");
+          // Vérifier si l'image existe en créant une requête
+          const img = new Image();
+          img.onload = () => setLogoUrl(data.publicUrl);
+          img.onerror = () => setLogoUrl(null);
+          img.src = data.publicUrl;
+        } catch (error) {
+          console.error("Erreur chargement logo:", error);
+          setLogoUrl(null);
+        }
+      }
+
+      React.useEffect(() => {
+        loadProjects();
+      }, [filter, searchTerm]);
+
+      async function logout() {
+        try {
+          await supabase.auth.signOut();
+          setUser(null);
+          setIsAdmin(false);
+          setPage("home");
+          setShowDropdown(false);
+          showToast("Déconnexion réussie");
+        } catch (error) {
+          console.error("Erreur lors de la déconnexion:", error);
+          showToast("Erreur lors de la déconnexion", "error");
+        }
+      }
+
+      return (
+        <div>
+          <header>
+            <div className="header-container">
+              <div className="logo-container" onClick={() => setPage("home")}>
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="logo-image" />
+                ) : (
+                  <>
+                    <span>🎓</span>
+                    <span>Galerie de Projets</span>
+                  </>
+                )}
+              </div>
+              {user ? (
+                <div className="user-menu">
+                  <button 
+                    className="btn" 
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    aria-expanded={showDropdown}
+                    aria-haspopup="true"
+                  >
+                    👤 {user.email} {isAdmin && "👑"} ▼
+                  </button>
+                  {showDropdown && (
+                    <div className="dropdown" role="menu">
+                      <div 
+                        className="dropdown-item" 
+                        onClick={() => { setPage("profile"); setShowDropdown(false); }}
+                        role="menuitem"
+                      >
+                        📝 Mon profil
+                      </div>
+                      <div 
+                        className="dropdown-item" 
+                        onClick={() => { setPage("my-projects"); setShowDropdown(false); }}
+                        role="menuitem"
+                      >
+                        🗂 Mes projets
+                      </div>
+                      <div 
+                        className="dropdown-item" 
+                        onClick={() => { setPage("add"); setShowDropdown(false); }}
+                        role="menuitem"
+                      >
+                        ➕ Nouveau projet
+                      </div>
+                      {isAdmin && (
+                        <>
+                          <div 
+                            className="dropdown-item" 
+                            onClick={() => { setPage("admin"); setShowDropdown(false); }}
+                            role="menuitem"
+                          >
+                            🛠️ Dashboard Admin
+                          </div>
+                          <div 
+                            className="dropdown-item" 
+                            onClick={() => { setPage("logo-settings"); setShowDropdown(false); }}
+                            role="menuitem"
+                          >
+                            🖼️ Gérer le logo
+                          </div>
+                        </>
+                      )}
+                      <div 
+                        className="dropdown-item" 
+                        onClick={logout} 
+                        style={{ color: 'var(--accent-color)' }}
+                        role="menuitem"
+                      >
+                        🚪 Déconnexion
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <button className="btn" onClick={() => setPage("login")}>Se connecter</button>
+                  <button className="btn btn-secondary" onClick={() => setPage("register")} style={{marginLeft:"10px"}}>
+                    Créer un compte
+                  </button>
+                </div>
+              )}
+            </div>
+          </header>
+
+          <div className="container">
+            {page === "home" && (
+              <HomePage setPage={setPage} user={user} isAdmin={isAdmin} />
+            )}
+            {page === "login" && (
+              <LoginPage setPage={setPage} showToast={showToast} />
+            )}
+            {page === "register" && (
+              <RegisterPage setPage={setPage} showToast={showToast} />
+            )}
+            {page === "add" && user && (
+              <AddProjectPage user={user} setPage={setPage} onAdded={loadProjects} isAdmin={isAdmin} showToast={showToast} />
+            )}
+            {page === "projects" && (
+              <ProjectsPage 
+                projects={projects} 
+                loading={loading} 
+                filter={filter}
+                setFilter={setFilter}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                user={user}
+                onProjectUpdate={loadProjects}
+                isAdmin={isAdmin}
+                showToast={showToast}
+              />
+            )}
+            {page === "my-projects" && user && (
+              <MyProjectsPage 
+                user={user} 
+                setPage={setPage}
+                onProjectUpdate={loadProjects}
+                showToast={showToast}
+              />
+            )}
+            {page === "profile" && user && (
+              <ProfilePage user={user} setPage={setPage} />
+            )}
+            {page === "admin" && isAdmin && (
+              <AdminDashboard 
+                user={user}
+                setPage={setPage}
+                onProjectUpdate={loadProjects}
+                showToast={showToast}
+              />
+            )}
+            {page === "logo-settings" && isAdmin && (
+              <LogoSettingsPage 
+                logoUrl={logoUrl}
+                onLogoUpdate={loadLogo}
+                showToast={showToast}
+              />
+            )}
+          </div>
+
+          {toast && (
+            <Toast 
+              message={toast.message} 
+              type={toast.type} 
+              onClose={() => setToast(null)} 
+            />
+          )}
+        </div>
+      );
+    }
+
+   function HomePage({ setPage, user, isAdmin }) {
+  return (
+    <div>
+      <div className="hero-section">
+        <h2>Galerie de Projets Éducatifs</h2>
+        <p>
+          Découvrez, partagez et collaborez sur des projets créatifs dans un environnement éducatif stimulant.
+        </p>
+        
+        <div className="nav-buttons">
+          {user ? (
+            <>
+              <button className="btn" onClick={() => setPage("add")}>
+                ➕ Ajouter un projet
+              </button>
+              <button className="btn btn-secondary" onClick={() => setPage("projects")}>
+                👀 Voir tous les projets
+              </button>
+              <button className="btn btn-secondary" onClick={() => setPage("my-projects")}>
+                🗂 Mes projets
+              </button>
+              {isAdmin && (
+                <button className="btn btn-warning" onClick={() => setPage("admin")}>
+                  🛠️ Dashboard Admin
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <button className="btn" onClick={() => setPage("register")}>
+                🚀 Commencer
+              </button>
+              <button className="btn btn-secondary" onClick={() => setPage("projects")}>
+                👀 Voir les projets
+              </button>
+              <button className="btn btn-secondary" onClick={() => setPage("login")}>
+                🔐 Se connecter
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="features-grid">
+        <div className="feature-card">
+          <div className="feature-icon">📁</div>
+          <h3>Multiformats</h3>
+          <p>Images, PDFs et modèles 3D supportés pour présenter vos projets sous différents formats.</p>
+        </div>
+        <div className="feature-card">
+          <div className="feature-icon">🔍</div>
+          <h3>Recherche Avancée</h3>
+          <p>Trouvez rapidement des projets par titre, description, tags ou type de fichier.</p>
+        </div>
+        <div className="feature-card">
+          <div className="feature-icon">👑</div>
+          <h3>Validation Admin</h3>
+          <p>Tous les projets sont validés par les enseignants avant publication.</p>
+        </div>
+        <div className="feature-card">
+          <div className="feature-icon">🎯</div>
+          <h3>Modération</h3>
+          <p>Système d'approbation pour maintenir la qualité des contenus partagés.</p>
+        </div>
+      </div>
+
+      {/* AJOUTEZ CETTE LIGNE POUR LES CRÉDITS */}
+      <CreditsFooter />
+    </div>
+  );
+}
+    function LoginPage({ setPage, showToast }) {
+      const [email, setEmail] = React.useState("");
+      const [password, setPassword] = React.useState("");
+      const [message, setMessage] = React.useState("");
+      const [loading, setLoading] = React.useState(false);
+
+      async function handleLogin(e) {
+        e.preventDefault();
+        setLoading(true);
+        try {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            setMessage("❌ " + error.message);
+            showToast("Erreur de connexion", "error");
+          } else {
+            showToast("Connexion réussie !");
+            setPage("projects");
+          }
+        } catch (error) {
+          setMessage("❌ Erreur inattendue");
+          showToast("Erreur inattendue", "error");
+        }
+        setLoading(false);
+      }
+
+      return (
+        <div className="card" style={{maxWidth: "400px", margin: "auto"}}>
+          <h2>🔐 Connexion</h2>
+          <form onSubmit={handleLogin}>
+            <input 
+              type="email" 
+              placeholder="📧 Email" 
+              value={email} 
+              onChange={(e)=>setEmail(e.target.value)} 
+              required 
+            />
+            <input 
+              type="password" 
+              placeholder="🔒 Mot de passe" 
+              value={password} 
+              onChange={(e)=>setPassword(e.target.value)} 
+              required 
+            />
+            <button className="btn" type="submit" disabled={loading} style={{width: "100%"}}>
+              {loading ? "⏳ Connexion..." : "🚀 Se connecter"}
+            </button>
+          </form>
+          {message && <p style={{color:"var(--accent-color)", textAlign: "center"}}>{message}</p>}
+          <p style={{textAlign: "center", marginTop: "1rem"}}>
+            Pas encore de compte ? <a href="#" onClick={(e)=>{e.preventDefault(); setPage("register")}} style={{color: "var(--secondary-color)"}}>S'inscrire</a>
+          </p>
+          <div style={{marginTop: "2rem", padding: "1rem", background: "#fff3cd", borderRadius: "8px"}}>
+            <h4>👑 Compte administrateur</h4>
+            <p><strong>Admin :</strong> admin@gmail.com / admin12345</p>
+            <p style={{fontSize: "0.9rem", marginTop: "0.5rem"}}>
+              <em>Si le compte n'existe pas, créez-le d'abord via "Créer un compte"</em>
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    function RegisterPage({ setPage, showToast }) {
+      const [email, setEmail] = React.useState("");
+      const [password, setPassword] = React.useState("");
+      const [confirm, setConfirm] = React.useState("");
+      const [message, setMessage] = React.useState("");
+      const [loading, setLoading] = React.useState(false);
+
+      async function handleRegister(e) {
+        e.preventDefault();
+        if (password !== confirm) {
+          setMessage("❌ Les mots de passe ne correspondent pas.");
+          return;
+        }
+        if (password.length < 6) {
+          setMessage("❌ Le mot de passe doit faire au moins 6 caractères.");
+          return;
+        }
+        
+        setLoading(true);
+        try {
+          const { error } = await supabase.auth.signUp({ 
+            email, 
+            password,
+            options: {
+              emailRedirectTo: window.location.origin
+            }
+          });
+          if (error) {
+            setMessage("❌ " + error.message);
+            showToast("Erreur lors de la création du compte", "error");
+          } else {
+            setMessage("✅ Compte créé ! Vous pouvez maintenant vous connecter.");
+            showToast("Compte créé avec succès !");
+            setTimeout(() => setPage("login"), 2000);
+          }
+        } catch (error) {
+          setMessage("❌ Erreur inattendue");
+          showToast("Erreur inattendue", "error");
+        }
+        setLoading(false);
+      }
+
+      return (
+        <div className="card" style={{maxWidth: "400px", margin: "auto"}}>
+          <h2>👤 Créer un compte</h2>
+          <form onSubmit={handleRegister}>
+            <input 
+              type="email" 
+              placeholder="📧 Email" 
+              value={email} 
+              onChange={(e)=>setEmail(e.target.value)} 
+              required 
+            />
+            <input 
+              type="password" 
+              placeholder="🔒 Mot de passe (min. 6 caractères)" 
+              value={password} 
+              onChange={(e)=>setPassword(e.target.value)} 
+              required 
+            />
+            <input 
+              type="password" 
+              placeholder="🔒 Confirmer le mot de passe" 
+              value={confirm} 
+              onChange={(e)=>setConfirm(e.target.value)} 
+              required 
+            />
+            <button className="btn" type="submit" disabled={loading} style={{width: "100%"}}>
+              {loading ? "⏳ Création..." : "🚀 Créer un compte"}
+            </button>
+          </form>
+          {message && <p style={{color: message.includes("❌") ? "var(--accent-color)" : "var(--success-color)", textAlign: "center"}}>{message}</p>}
+          <p style={{textAlign: "center", marginTop: "1rem"}}>
+            Déjà un compte ? <a href="#" onClick={(e)=>{e.preventDefault(); setPage("login")}} style={{color: "var(--secondary-color)"}}>Se connecter</a>
+          </p>
+        </div>
+      );
+    }
+
+    function AddProjectPage({ user, setPage, onAdded, isAdmin, showToast }) {
+      const [title, setTitle] = React.useState("");
+      const [description, setDescription] = React.useState("");
+      const [file, setFile] = React.useState(null);
+      const [tags, setTags] = React.useState("");
+      const [msg, setMsg] = React.useState("");
+      const [uploading, setUploading] = React.useState(false);
+      const [fileType, setFileType] = React.useState("");
+
+      function handleFileChange(e) {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) return;
+        
+        setFile(selectedFile);
+        
+        // Déterminer le type de fichier
+        if (selectedFile.type.startsWith("image/")) {
+          setFileType("image");
+        } else if (selectedFile.type === "application/pdf") {
+          setFileType("pdf");
+        } else {
+          // Vérifier l'extension pour les fichiers 3D
+          const extension = selectedFile.name.split('.').pop().toLowerCase();
+          if (['glb', 'gltf', 'obj', 'stl'].includes(extension)) {
+            setFileType("3d");
+          } else {
+            setFileType("unknown");
+          }
+        }
+      }
+
+      async function handleUpload(e) {
+        e.preventDefault();
+        if (!file) { 
+          setMsg("❌ Sélectionne un fichier."); 
+          showToast("Veuillez sélectionner un fichier", "error");
+          return; 
+        }
+        if (file.size > 50 * 1024 * 1024) {
+          setMsg("❌ Le fichier est trop volumineux (max 50MB)");
+          showToast("Fichier trop volumineux (max 50MB)", "error");
+          return;
+        }
+
+        setUploading(true);
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+        const filePath = `projects/${fileName}`;
+
+        try {
+          // Étape 1: Upload du fichier
+          const { error: uploadError } = await supabase.storage.from("projects").upload(filePath, file);
+          if (uploadError) {
+            setMsg("❌ Erreur upload : " + uploadError.message);
+            showToast("Erreur lors de l'upload du fichier", "error");
+            setUploading(false);
+            return;
+          }
+
+          // Étape 2: Insertion dans la base de données
+          const projectData = {
+            title,
+            description,
+            author_id: user.id,
+            author_name: user.email,
+            file_path: filePath,
+            file_type: fileType,
+            tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+            status: isAdmin ? 'approved' : 'pending'
+          };
+
+          const { error: dbError } = await supabase.from("projects").insert([projectData]);
+
+          if (dbError) {
+            console.error("Erreur détaillée:", dbError);
+            setMsg("❌ Erreur base de données : " + dbError.message);
+            showToast("Erreur lors de l'ajout du projet", "error");
+            setUploading(false);
+          } else {
+            setMsg(`✅ Projet ajouté ! ${isAdmin ? 'Publié directement.' : 'En attente de validation par l\'administrateur.'}`);
+            showToast("Projet ajouté avec succès !");
+            setTimeout(() => {
+              setPage("projects");
+              onAdded();
+            }, 2000);
+          }
+        } catch (error) {
+          console.error("Erreur générale:", error);
+          setMsg("❌ Erreur inattendue : " + error.message);
+          showToast("Erreur inattendue", "error");
+          setUploading(false);
+        }
+      }
+
+      return (
+        <div className="card" style={{maxWidth: "600px", margin: "auto"}}>
+          <h2>➕ Ajouter un projet</h2>
+          <form onSubmit={handleUpload}>
+            <input placeholder="📝 Titre du projet" value={title} onChange={(e)=>setTitle(e.target.value)} required />
+            <textarea placeholder="📋 Description du projet" rows="4" value={description} onChange={(e)=>setDescription(e.target.value)} required />
+            <input placeholder="🏷️ Tags (séparés par des virgules)" value={tags} onChange={(e)=>setTags(e.target.value)} />
+            <div>
+              <label>📁 Fichier (Image, PDF ou Modèle 3D - max 50MB)</label>
+              <input 
+                type="file" 
+                accept="image/*,.pdf,.glb,.gltf,.obj,.stl" 
+                onChange={handleFileChange} 
+                required 
+              />
+              {file && (
+                <div className="file-info">
+                  📄 Fichier sélectionné : {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  {fileType && <span className="file-type-badge">{fileType.toUpperCase()}</span>}
+                </div>
+              )}
+            </div>
+            <div style={{display: "flex", gap: "1rem"}}>
+              <button className="btn" type="submit" disabled={uploading} style={{flex: 1}}>
+                {uploading ? "⏳ Publication..." : "🚀 Publier le projet"}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => setPage("projects")}>
+                ↩️ Annuler
+              </button>
+            </div>
+          </form>
+          {msg && <p style={{color: msg.includes("❌") ? "var(--accent-color)" : "var(--success-color)", textAlign: "center"}}>{msg}</p>}
+        </div>
+      );
+    }
+
+    function ProjectsPage({ projects, loading, filter, setFilter, searchTerm, setSearchTerm, user, onProjectUpdate, isAdmin, showToast }) {
+      const [selectedProject, setSelectedProject] = React.useState(null);
+      
+      // Filtrer les projets selon le statut et les permissions
+      const visibleProjects = projects.filter(project => 
+        isAdmin || project.status === 'approved' || (user && project.author_id === user.id)
+      );
+
+      if (loading) return <div className="loading">⏳ Chargement des projets...</div>;
+
+      return (
+        <div>
+          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem"}}>
+            <h2 style={{margin: 0, color: "var(--primary-color)"}}>
+              🎨 Tous les projets ({visibleProjects.length})
+              {isAdmin && <span style={{fontSize: "1rem", marginLeft: "1rem"}}>👑 Mode Admin</span>}
+            </h2>
+            {user && (
+              <button className="btn" onClick={() => window.location.href = "#add"}>
+                ➕ Nouveau projet
+              </button>
+            )}
+          </div>
+
+          <div className="filter-bar">
+            <input
+              className="search-input"
+              type="text"
+              placeholder="🔍 Rechercher un projet..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <select value={filter} onChange={(e) => setFilter(e.target.value)} style={{width: "auto"}}>
+              <option value="all">📁 Tous les types</option>
+              <option value="image">🖼️ Images</option>
+              <option value="pdf">📄 PDFs</option>
+              <option value="3d">🎮 Modèles 3D</option>
+            </select>
+            {isAdmin && (
+              <select onChange={(e) => setFilter(e.target.value)} style={{width: "auto"}}>
+                <option value="all">📊 Tous les statuts</option>
+                <option value="pending">⏳ En attente</option>
+                <option value="approved">✅ Approuvés</option>
+                <option value="rejected">❌ Rejetés</option>
+              </select>
+            )}
+          </div>
+
+          {!visibleProjects.length ? (
+            <div className="card" style={{textAlign: "center"}}>
+              <h3>😔 Aucun projet trouvé</h3>
+              <p>Essayez de modifier vos critères de recherche ou ajoutez le premier projet !</p>
+              {user && (
+                <button className="btn" onClick={() => window.location.href = "#add"}>
+                  ➕ Ajouter un projet
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid">
+              {visibleProjects.map((project) => (
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  onSelect={setSelectedProject}
+                  user={user}
+                  onProjectUpdate={onProjectUpdate}
+                  isAdmin={isAdmin}
+                  showToast={showToast}
+                />
+              ))}
+            </div>
+          )}
+
+          {selectedProject && (
+            <ProjectModal 
+              project={selectedProject} 
+              onClose={() => setSelectedProject(null)} 
+              isAdmin={isAdmin}
+              onProjectUpdate={onProjectUpdate}
+              showToast={showToast}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function ProjectCard({ project, onSelect, user, onProjectUpdate, isAdmin, showToast }) {
+      const [url, setUrl] = React.useState("");
+      const [imageUrl, setImageUrl] = React.useState("");
+
+      React.useEffect(() => {
+        const { data } = supabase.storage.from("projects").getPublicUrl(project.file_path);
+        setUrl(data.publicUrl);
+        if (project.file_type === "image") {
+          setImageUrl(data.publicUrl);
+        }
+      }, [project.file_path]);
+
+      async function handleDelete() {
+        if (!confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) return;
+        
+        try {
+          await supabase.storage.from("projects").remove([project.file_path]);
+          await supabase.from("projects").delete().eq("id", project.id);
+          onProjectUpdate();
+          showToast("Projet supprimé avec succès");
+        } catch (error) {
+          console.error("Erreur lors de la suppression:", error);
+          showToast("Erreur lors de la suppression", "error");
+        }
+      }
+
+      const getStatusBadge = () => {
+        const statusConfig = {
+          pending: { class: 'status-pending', text: '⏳ En attente' },
+          approved: { class: 'status-approved', text: '✅ Approuvé' },
+          rejected: { class: 'status-rejected', text: '❌ Rejeté' }
+        };
+        const config = statusConfig[project.status] || statusConfig.pending;
+        return <span className={`status-badge ${config.class}`}>{config.text}</span>;
+      };
+
+      const getFileTypeIcon = () => {
+        const icons = {
+          image: '🖼️',
+          pdf: '📄',
+          '3d': '🎮'
+        };
+        return icons[project.file_type] || '📁';
+      };
+
+      return (
+        <div className="card">
+          {project.file_type === "image" && imageUrl && (
+            <img 
+              src={imageUrl} 
+              alt={project.title}
+              className="project-image"
+              onClick={() => onSelect(project)}
+              style={{cursor: "pointer"}}
+            />
+          )}
+          {project.file_type === "pdf" && (
+            <div className="project-pdf" onClick={() => onSelect(project)} style={{cursor: "pointer"}}>
+              📄 {project.title}
+            </div>
+          )}
+          {project.file_type === "3d" && (
+            <div className="project-3d" onClick={() => onSelect(project)} style={{cursor: "pointer"}}>
+              <div style={{textAlign: "center"}}>
+                <div style={{fontSize: "3rem", marginBottom: "0.5rem"}}>🎮</div>
+                <div>Modèle 3D</div>
+                <div style={{fontSize: "0.8rem", color: "#666"}}>{project.title}</div>
+              </div>
+            </div>
+          )}
+          
+          <h3>
+            {getFileTypeIcon()} {project.title}
+            {getStatusBadge()}
+          </h3>
+          <p>{project.description}</p>
+          
+          {project.tags && project.tags.length > 0 && (
+            <div style={{marginBottom: "1rem"}}>
+              {project.tags.map((tag, index) => (
+                <span key={index} className="tag">#{tag}</span>
+              ))}
+            </div>
+          )}
+          
+          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+            <div>
+              <p style={{margin: 0, fontSize: "0.9rem", color: "#666"}}>
+                <strong>👤 {project.author_name}</strong>
+              </p>
+              <p style={{margin: 0, fontSize: "0.8rem", color: "#999"}}>
+                📅 {new Date(project.created_at).toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+            
+            <div style={{display: "flex", gap: "0.5rem"}}>
+              <button 
+                className="btn" 
+                onClick={() => onSelect(project)}
+                style={{padding: "0.5rem"}}
+              >
+                👁️
+              </button>
+              {(user && user.id === project.author_id) || isAdmin ? (
+                <button 
+                  className="btn btn-danger" 
+                  onClick={handleDelete}
+                  style={{padding: "0.5rem"}}
+                >
+                  🗑️
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ThreeDViewer({ url }) {
+      const containerRef = React.useRef();
+      const [loading, setLoading] = React.useState(true);
+      const [error, setError] = React.useState(null);
+
+      React.useEffect(() => {
+        if (!containerRef.current) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+        renderer.setClearColor(0xf8f9fa);
+        containerRef.current.innerHTML = '';
+        containerRef.current.appendChild(renderer.domElement);
+
+        // Lumière ambiante
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        // Lumière directionnelle
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 10, 5);
+        scene.add(directionalLight);
+
+        // Charger le modèle 3D selon l'extension
+        const extension = url.split('.').pop().toLowerCase();
+        let loader;
+
+        if (extension === 'glb' || extension === 'gltf') {
+          loader = new THREE.GLTFLoader();
+        } else if (extension === 'obj') {
+          loader = new THREE.OBJLoader();
+        } else if (extension === 'stl') {
+          loader = new THREE.STLLoader();
+        } else {
+          setError("Format 3D non supporté");
+          setLoading(false);
+          return;
+        }
+
+        loader.load(
+          url,
+          (object) => {
+            let model;
+            if (extension === 'glb' || extension === 'gltf') {
+              model = object.scene;
+            } else {
+              model = object;
+            }
+            
+            scene.add(model);
+            setLoading(false);
+            
+            // Ajuster la caméra pour voir tout le modèle
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const fov = camera.fov * (Math.PI / 180);
+            let cameraZ = Math.abs(maxDim / Math.sin(fov / 2));
+            cameraZ *= 1.5;
+
+            camera.position.set(0, 0, cameraZ);
+            camera.lookAt(center);
+          },
+          (progress) => {
+            // Progression du chargement
+            console.log('Chargement:', (progress.loaded / progress.total * 100) + '%');
+          },
+          (error) => {
+            console.error('Erreur chargement 3D:', error);
+            setError("Impossible de charger le modèle 3D");
+            setLoading(false);
+          }
+        );
+
+        // Animation
+        function animate() {
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
+        }
+        animate();
+
+        // Redimensionnement
+        const handleResize = () => {
+          camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+        };
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+          window.removeEventListener('resize', handleResize);
+          renderer.dispose();
+        };
+      }, [url]);
+
+      return (
+        <div>
+          {loading && <div style={{textAlign: "center", padding: "2rem"}}>⏳ Chargement du modèle 3D...</div>}
+          {error && <div style={{textAlign: "center", padding: "2rem", color: "var(--accent-color)"}}>{error}</div>}
+          <div ref={containerRef} className="three-container"></div>
+          <div style={{textAlign: "center", marginTop: "1rem", fontSize: "0.9rem", color: "#666"}}>
+            🖱️ Utilisez la souris pour tourner autour du modèle
+          </div>
+        </div>
+      );
+    }
+
+    function ProjectModal({ project, onClose, isAdmin, onProjectUpdate, showToast }) {
+      const [url, setUrl] = React.useState("");
+
+      React.useEffect(() => {
+        const { data } = supabase.storage.from("projects").getPublicUrl(project.file_path);
+        setUrl(data.publicUrl);
+      }, [project.file_path]);
+
+      async function handleStatusUpdate(newStatus) {
+        try {
+          await supabase.from("projects").update({ status: newStatus }).eq("id", project.id);
+          onProjectUpdate();
+          onClose();
+          showToast(`Projet ${newStatus === 'approved' ? 'approuvé' : 'rejeté'} avec succès`);
+        } catch (error) {
+          console.error("Erreur lors de la mise à jour:", error);
+          showToast("Erreur lors de la mise à jour du statut", "error");
+        }
+      }
+
+      return (
+        <div className="modal">
+          <button className="close-button" onClick={onClose}>✕</button>
+          <div className="modal-content">
+            <h2>{project.title}</h2>
+            <p><strong>Description :</strong> {project.description}</p>
+            <p><strong>Auteur :</strong> {project.author_name}</p>
+            <p><strong>Date :</strong> {new Date(project.created_at).toLocaleString('fr-FR')}</p>
+            <p><strong>Type :</strong> 
+              {project.file_type === 'image' ? ' 🖼️ Image' : 
+               project.file_type === 'pdf' ? ' 📄 PDF' : ' 🎮 Modèle 3D'}
+            </p>
+            <p><strong>Statut :</strong> 
+              <span className={`status-badge status-${project.status}`}>
+                {project.status === 'pending' ? '⏳ En attente' : 
+                 project.status === 'approved' ? '✅ Approuvé' : '❌ Rejeté'}
+              </span>
+            </p>
+            
+            {isAdmin && project.status === 'pending' && (
+              <div className="admin-actions">
+                <button className="admin-action-btn btn-success" onClick={() => handleStatusUpdate('approved')}>
+                  ✅ Accepter
+                </button>
+                <button className="admin-action-btn btn-danger" onClick={() => handleStatusUpdate('rejected')}>
+                  ❌ Refuser
+                </button>
+              </div>
+            )}
+            
+            {project.file_type === "image" ? (
+              <img src={url} alt={project.title} className="modal-image" />
+            ) : project.file_type === "pdf" ? (
+              <div style={{textAlign: "center"}}>
+                <p>📄 Document PDF</p>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="btn">
+                  📥 Télécharger le PDF
+                </a>
+              </div>
+            ) : (
+              <ThreeDViewer url={url} />
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function MyProjectsPage({ user, setPage, onProjectUpdate, showToast }) {
+      const [myProjects, setMyProjects] = React.useState([]);
+      const [loading, setLoading] = React.useState(true);
+
+      React.useEffect(() => {
+        loadMyProjects();
+      }, []);
+
+      async function loadMyProjects() {
+        setLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from("projects")
+            .select("*")
+            .eq("author_id", user.id)
+            .order("created_at", { ascending: false });
+          
+          if (error) {
+            console.error("Erreur:", error);
+            showToast("Erreur lors du chargement de vos projets", "error");
+          } else {
+            setMyProjects(data || []);
+          }
+        } catch (error) {
+          console.error("Erreur inattendue:", error);
+          showToast("Erreur inattendue", "error");
+        }
+        setLoading(false);
+      }
+
+      if (loading) return <div className="loading">⏳ Chargement de vos projets...</div>;
+
+      return (
+        <div>
+          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem"}}>
+            <h2 style={{margin: 0, color: "var(--primary-color)"}}>🗂 Mes projets ({myProjects.length})</h2>
+            <button className="btn" onClick={() => setPage("add")}>
+              ➕ Nouveau projet
+            </button>
+          </div>
+
+          {!myProjects.length ? (
+            <div className="card" style={{textAlign: "center"}}>
+              <h3>😔 Vous n'avez pas encore de projets</h3>
+              <p>Commencez par ajouter votre premier projet !</p>
+              <button className="btn" onClick={() => setPage("add")}>
+                ➕ Ajouter un projet
+              </button>
+            </div>
+          ) : (
+            <div className="grid">
+              {myProjects.map((project) => (
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  user={user}
+                  onProjectUpdate={() => {
+                    loadMyProjects();
+                    onProjectUpdate();
+                  }}
+                  showToast={showToast}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function ProfilePage({ user, setPage }) {
+      const [userProjects, setUserProjects] = React.useState([]);
+      const [stats, setStats] = React.useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+
+      React.useEffect(() => {
+        loadUserStats();
+      }, []);
+
+      async function loadUserStats() {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("*")
+          .eq("author_id", user.id);
+        
+        if (data) {
+          setUserProjects(data);
+          setStats({
+            total: data.length,
+            pending: data.filter(p => p.status === 'pending').length,
+            approved: data.filter(p => p.status === 'approved').length,
+            rejected: data.filter(p => p.status === 'rejected').length
+          });
+        }
+      }
+
+      return (
+        <div className="card" style={{maxWidth: "600px", margin: "auto"}}>
+          <h2>👤 Mon Profil</h2>
+          <div style={{display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "1rem", marginBottom: "2rem"}}>
+            <div style={{textAlign: "center", padding: "1rem", background: "#f8f9fa", borderRadius: "10px"}}>
+              <h3>{stats.total}</h3>
+              <p>Total</p>
+            </div>
+            <div style={{textAlign: "center", padding: "1rem", background: "#fff3cd", borderRadius: "10px"}}>
+              <h3>{stats.pending}</h3>
+              <p>En attente</p>
+            </div>
+            <div style={{textAlign: "center", padding: "1rem", background: "#d1edff", borderRadius: "10px"}}>
+              <h3>{stats.approved}</h3>
+              <p>Approuvés</p>
+            </div>
+            <div style={{textAlign: "center", padding: "1rem", background: "#f8d7da", borderRadius: "10px"}}>
+              <h3>{stats.rejected}</h3>
+              <p>Rejetés</p>
+            </div>
+          </div>
+          
+          <div style={{marginBottom: "1rem"}}>
+            <strong>📧 Email :</strong> {user.email}
+          </div>
+          <div style={{marginBottom: "2rem"}}>
+            <strong>🆔 ID :</strong> {user.id}
+          </div>
+          
+          <div style={{display: "flex", gap: "1rem"}}>
+            <button className="btn" onClick={() => setPage("my-projects")}>
+              🗂 Voir mes projets
+            </button>
+            <button className="btn btn-secondary" onClick={() => setPage("add")}>
+              ➕ Nouveau projet
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    function AdminDashboard({ user, setPage, onProjectUpdate, showToast }) {
+      const [pendingProjects, setPendingProjects] = React.useState([]);
+      const [stats, setStats] = React.useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+      const [loading, setLoading] = React.useState(true);
+
+      React.useEffect(() => {
+        loadAdminData();
+      }, []);
+
+      async function loadAdminData() {
+        setLoading(true);
+        
+        try {
+          // Charger tous les projets pour les statistiques
+          const { data: allProjects, error } = await supabase
+            .from("projects")
+            .select("*");
+          
+          if (error) {
+            console.error("Erreur:", error);
+            showToast("Erreur lors du chargement des données", "error");
+            return;
+          }
+
+          // Charger les projets en attente
+          const { data: pendingData } = await supabase
+            .from("projects")
+            .select("*")
+            .eq("status", "pending")
+            .order("created_at", { ascending: true });
+
+          setPendingProjects(pendingData || []);
+          
+          // Calculer les statistiques
+          if (allProjects) {
+            setStats({
+              total: allProjects.length,
+              pending: allProjects.filter(p => p.status === 'pending').length,
+              approved: allProjects.filter(p => p.status === 'approved').length,
+              rejected: allProjects.filter(p => p.status === 'rejected').length
+            });
+          }
+        } catch (error) {
+          console.error("Erreur inattendue:", error);
+          showToast("Erreur inattendue", "error");
+        }
+        
+        setLoading(false);
+      }
+
+      async function handleStatusUpdate(projectId, newStatus) {
+        try {
+          await supabase.from("projects").update({ status: newStatus }).eq("id", projectId);
+          loadAdminData();
+          onProjectUpdate();
+          showToast(`Projet ${newStatus === 'approved' ? 'approuvé' : 'rejeté'} avec succès`);
+        } catch (error) {
+          console.error("Erreur lors de la mise à jour:", error);
+          showToast("Erreur lors de la mise à jour du statut", "error");
+        }
+      }
+
+      if (loading) return <div className="loading">⏳ Chargement du dashboard...</div>;
+
+      return (
+        <div>
+          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem"}}>
+            <h2 style={{margin: 0, color: "var(--primary-color)"}}>👑 Dashboard Administrateur</h2>
+            <button className="btn" onClick={() => setPage("projects")}>
+              👀 Voir la galerie
+            </button>
+          </div>
+
+          {/* Statistiques */}
+          <div className="admin-stats">
+            <div className="stat-card">
+              <div className="stat-number">{stats.total}</div>
+              <div>Projets total</div>
+            </div>
+            <div className="stat-card" style={{background: "#fff3cd"}}>
+              <div className="stat-number">{stats.pending}</div>
+              <div>En attente</div>
+            </div>
+            <div className="stat-card" style={{background: "#d1edff"}}>
+              <div className="stat-number">{stats.approved}</div>
+              <div>Approuvés</div>
+            </div>
+            <div className="stat-card" style={{background: "#f8d7da"}}>
+              <div className="stat-number">{stats.rejected}</div>
+              <div>Rejetés</div>
+            </div>
+          </div>
+
+          {/* Projets en attente */}
+          <div className="card">
+            <h3>⏳ Projets en attente de validation ({pendingProjects.length})</h3>
+            
+            {pendingProjects.length === 0 ? (
+              <p style={{textAlign: "center", padding: "2rem"}}>🎉 Aucun projet en attente de validation !</p>
+            ) : (
+              <div className="grid">
+                {pendingProjects.map((project) => (
+                  <div key={project.id} className="card">
+                    <h4>{project.title}</h4>
+                    <p>{project.description}</p>
+                    <p><strong>Auteur :</strong> {project.author_name}</p>
+                    <p><strong>Type :</strong> 
+                      {project.file_type === 'image' ? ' 🖼️ Image' : 
+                       project.file_type === 'pdf' ? ' 📄 PDF' : ' 🎮 Modèle 3D'}
+                    </p>
+                    
+                    <div className="admin-actions">
+                      <button 
+                        className="admin-action-btn btn-success"
+                        onClick={() => handleStatusUpdate(project.id, 'approved')}
+                      >
+                        ✅ Accepter
+                      </button>
+                      <button 
+                        className="admin-action-btn btn-danger"
+                        onClick={() => handleStatusUpdate(project.id, 'rejected')}
+                      >
+                        ❌ Refuser
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Actions rapides */}
+          <div className="card">
+            <h3>⚡ Actions rapides</h3>
+            <div style={{display: "flex", gap: "1rem", flexWrap: "wrap"}}>
+              <button className="btn" onClick={() => setPage("projects")}>
+                📊 Voir tous les projets
+              </button>
+              <button className="btn btn-secondary" onClick={loadAdminData}>
+                🔄 Actualiser
+              </button>
+              <button className="btn btn-warning" onClick={() => setPage("logo-settings")}>
+                🖼️ Gérer le logo
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function LogoSettingsPage({ logoUrl, onLogoUpdate, showToast }) {
+      const [logoFile, setLogoFile] = React.useState(null);
+      const [uploading, setUploading] = React.useState(false);
+
+      function handleLogoChange(e) {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) return;
+        
+        if (!selectedFile.type.startsWith("image/")) {
+          showToast("Veuillez sélectionner une image", "error");
+          return;
+        }
+        
+        if (selectedFile.size > 5 * 1024 * 1024) {
+          showToast("L'image est trop volumineuse (max 5MB)", "error");
+          return;
+        }
+        
+        setLogoFile(selectedFile);
+      }
+
+      async function handleLogoUpload() {
+        if (!logoFile) {
+          showToast("Veuillez sélectionner un fichier", "error");
+          return;
+        }
+
+        setUploading(true);
+        try {
+          // Supprimer l'ancien logo s'il existe
+          try {
+            await supabase.storage.from("projects").remove(["logo/logo.png"]);
+          } catch (error) {
+            // Le fichier n'existe peut-être pas, c'est normal
+          }
+
+          // Uploader le nouveau logo
+          const { error: uploadError } = await supabase.storage
+            .from("projects")
+            .upload("logo/logo.png", logoFile, { upsert: true });
+
+          if (uploadError) {
+            console.error("Erreur upload logo:", uploadError);
+            showToast("Erreur lors de l'upload du logo", "error");
+            setUploading(false);
+            return;
+          }
+
+          showToast("Logo mis à jour avec succès !");
+          onLogoUpdate();
+          setLogoFile(null);
+        } catch (error) {
+          console.error("Erreur inattendue:", error);
+          showToast("Erreur inattendue", "error");
+        }
+        setUploading(false);
+      }
+
+      async function handleLogoDelete() {
+        if (!confirm("Êtes-vous sûr de vouloir supprimer le logo ?")) return;
+        
+        try {
+          await supabase.storage.from("projects").remove(["logo/logo.png"]);
+          showToast("Logo supprimé avec succès");
+          onLogoUpdate();
+        } catch (error) {
+          console.error("Erreur suppression logo:", error);
+          showToast("Erreur lors de la suppression du logo", "error");
+        }
+      }
+
+      return (
+        <div className="logo-upload-container">
+          <h2>🖼️ Gestion du logo</h2>
+          <p>Personnalisez le logo de votre galerie de projets.</p>
+          
+          <div>
+            <label>📁 Sélectionner un nouveau logo (PNG, JPG - max 5MB)</label>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleLogoChange} 
+            />
+          </div>
+          
+          <div className="logo-preview">
+            <h3>Aperçu du logo actuel :</h3>
+            {logoUrl ? (
+              <div>
+                <img src={logoUrl} alt="Logo actuel" />
+                <div style={{marginTop: "1rem"}}>
+                  <button className="btn btn-danger" onClick={handleLogoDelete}>
+                    🗑️ Supprimer le logo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p>Aucun logo défini</p>
+            )}
+          </div>
+          
+          {logoFile && (
+            <div style={{marginTop: "1rem"}}>
+              <h3>Nouveau logo sélectionné :</h3>
+              <img 
+                src={URL.createObjectURL(logoFile)} 
+                alt="Nouveau logo" 
+                style={{maxHeight: "100px", maxWidth: "100%"}}
+              />
+              <div style={{marginTop: "1rem"}}>
+                <button 
+                  className="btn btn-success" 
+                  onClick={handleLogoUpload}
+                  disabled={uploading}
+                >
+                  {uploading ? "⏳ Upload..." : "💾 Sauvegarder le logo"}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          <div style={{marginTop: "2rem"}}>
+            <button className="btn btn-secondary" onClick={() => window.history.back()}>
+              ↩️ Retour
+            </button>
+          </div>
+        </div>
+      );
+    }
+function CreditsFooter() {
+  return (
+    <footer className="credits-footer">
+      <div className="container">
+        <p className="credits-text">🚀 Projet réalisé par :</p>
+        <p className="credits-names">Aissa Zemmour, Souhaib Chhbari, Mensour</p>
+        <p style={{marginTop: "1rem", opacity: 0.8, fontSize: "0.9rem"}}>
+          Galerie de projets éducatifs - 2025 pour licee mouhos.
+        </p>
+      </div>
+    </footer>
+  );
+}
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>
